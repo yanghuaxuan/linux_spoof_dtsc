@@ -1,0 +1,52 @@
+--- /arch/x86/kvm/vmx/vmx.c	2022-12-11 14:15:18
++++ ./vmx.c	2023-04-08 05:18:42
+@@ -5949,6 +5949,41 @@ static int handle_notify(struct kvm_vcpu *vcpu)
+ 	}
+ 
+ 	return 1;
++}
++
++static u32 print_once = 1;
++
++static int handle_rdtsc(struct kvm_vcpu *vcpu)
++{
++	static u64 rdtsc_fake = 0;
++	static u64 rdtsc_prev = 0;
++	u64 rdtsc_real = rdtsc();
++
++	if(print_once)
++	{
++		printk("[handle_rdtsc] fake rdtsc vmx function is working\n");
++		print_once = 0;
++		rdtsc_fake = rdtsc_real;
++	}
++
++	if(rdtsc_prev != 0)
++	{
++		if(rdtsc_real > rdtsc_prev)
++		{
++			u64 diff = rdtsc_real - rdtsc_prev;
++			u64 fake_diff =  diff / 16; // if you have 4.2Ghz on your vm, change 16 to 20
++			rdtsc_fake += fake_diff;
++		}
++	}
++	if(rdtsc_fake > rdtsc_real)
++	{
++		rdtsc_fake = rdtsc_real;
++	}
++	rdtsc_prev = rdtsc_real;
++    	vcpu->arch.regs[VCPU_REGS_RAX] = rdtsc_fake & -1u;
++    	vcpu->arch.regs[VCPU_REGS_RDX] = (rdtsc_fake >> 32) & -1u;
++
++    	return skip_emulated_instruction(vcpu);
+ }
+ 
+ /*
+@@ -6008,6 +6043,7 @@ static int (*kvm_vmx_exit_handlers[])(struct kvm_vcpu 
+ 	[EXIT_REASON_PREEMPTION_TIMER]	      = handle_preemption_timer,
+ 	[EXIT_REASON_ENCLS]		      = handle_encls,
+ 	[EXIT_REASON_BUS_LOCK]                = handle_bus_lock_vmexit,
++ 	[EXIT_REASON_RDTSC]	        = handle_rdtsc, 
+ 	[EXIT_REASON_NOTIFY]		      = handle_notify,
+ };
+ 

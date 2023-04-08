@@ -4,6 +4,8 @@ Tested on Linux 6.1.19 on an AMD CPU
 
 Credits to [this repository](https://github.com/WCharacter/RDTSC-KVM-Handler) for making this possible
 
+View diff files for changes
+
 # Instructions
 * Clone official Linux kernel
 * Install requirements for compiling kernel

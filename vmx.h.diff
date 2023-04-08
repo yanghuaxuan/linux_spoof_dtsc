@@ -1,0 +1,10 @@
+--- /arch/x86/kvm/vmx/vmx.h	2022-12-11 14:15:18
++++ ./vmx.h	2023-04-08 05:16:15
+@@ -536,6 +536,7 @@ static inline u8 vmx_get_rvi(void)
+ 	 CPU_BASED_MONITOR_EXITING |					\
+ 	 CPU_BASED_INVLPG_EXITING |					\
+ 	 CPU_BASED_RDPMC_EXITING |					\
++   CPU_BASED_RDTSC_EXITING |					\
+ 	 CPU_BASED_INTR_WINDOW_EXITING)
+ 
+ #ifdef CONFIG_X86_64
